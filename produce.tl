@@ -1,14 +1,13 @@
-local rng = require "src.sqrl-rng"
-
-print(rng.maxval)
+local sqrl = require "src.sqrl-rng"
 
 local f = io.open("output.vals", "wb")
 local args = {...}
 local n<const> = tonumber(args[1]) as integer
+local g = sqrl.gen(0)
 
 pcall(function()
-    for i = 1, n do
-        f:write(string.pack("f", rng.noiseM11(0, i)))
+    for _ = 1, n do
+        f:write(string.pack("f", g:nextM11()))
     end
 end)
 

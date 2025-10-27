@@ -54,7 +54,6 @@ else
     end
 end
 local oneOverMaxval = 1 / M.maxval
-print(oneOverMaxval)
 
 local function clamp32_many(...: integer): integer...
     local args = {...}
@@ -111,10 +110,46 @@ function M.noiseM11(seed: integer, x: integer, y?: integer, z?: integer, t?: int
     return 2 * M.noise01(seed, x, y, z, t) - 1
 end
 
-local record PRNG
-    state: integer
+local record SqrlRng
+    seed: integer
+    offset: integer
 
-    -- TODO
+    next: function(self): integer
+    next01: function(self): number
+    nextM11: function(self): number
+
+    metamethod __call: function(self): number
+end
+
+local SqrlRng__idx = {
+    next = function(self: SqrlRng): integer
+        local out = M.noise(self.seed, self.offset)
+        self.offset = self.offset + 1
+        return out
+    end,
+    next01 = function(self: SqrlRng): number
+        local out = M.noise01(self.seed, self.offset)
+        self.offset = self.offset + 1
+        return out
+    end,
+    nextM11 = function(self: SqrlRng): number
+        local out = M.noiseM11(self.seed, self.offset)
+        self.offset = self.offset + 1
+        return out
+    end
+}
+local SqrlRng__meta = {
+    __index = SqrlRng__idx,
+    __call = function(self: SqrlRng): number
+        return self:next01()
+    end
+}
+
+function M.gen(seed: integer): SqrlRng
+    return setmetatable(
+        {seed = seed, offset = 0},
+        SqrlRng__meta
+    )
 end
 
 return M

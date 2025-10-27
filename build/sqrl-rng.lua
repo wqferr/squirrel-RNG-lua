@@ -38,8 +38,9 @@ local M = {
    maxval = 0,
 }
 
+local int32max = 2147483647
 local clamp32
-if _tl_math_maxinteger <= 2147483647 then
+if _tl_math_maxinteger <= int32max then
 
    M.maxval = _tl_math_maxinteger
    clamp32 = function(v)
@@ -47,7 +48,7 @@ if _tl_math_maxinteger <= 2147483647 then
    end
 else
 
-   M.maxval = 2147483647
+   M.maxval = int32max
    clamp32 = function(v)
       return v % (M.maxval + 1)
    end
@@ -83,7 +84,7 @@ local function mangle(seed, offset)
    mangledBits = mangledBits * SQ5_BIT_NOISE5
    mangledBits = mangledBits ~ (mangledBits >> 17)
 
-   return clamp32(math.floor(mangledBits))
+   return clamp32(mangledBits)
 end
 
 function M.noise(seed, x, y, z, t)
@@ -107,6 +108,48 @@ end
 
 function M.noiseM11(seed, x, y, z, t)
    return 2 * M.noise01(seed, x, y, z, t) - 1
+end
+
+
+
+
+
+
+
+
+
+
+
+
+local SqrlRng__idx = {
+   next = function(self)
+      local out = M.noise(self.seed, self.offset)
+      self.offset = self.offset + 1
+      return out
+   end,
+   next01 = function(self)
+      local out = M.noise01(self.seed, self.offset)
+      self.offset = self.offset + 1
+      return out
+   end,
+   nextM11 = function(self)
+      local out = M.noiseM11(self.seed, self.offset)
+      self.offset = self.offset + 1
+      return out
+   end,
+}
+local SqrlRng__meta = {
+   __index = SqrlRng__idx,
+   __call = function(self)
+      return self:next01()
+   end,
+}
+
+function M.gen(seed)
+   return setmetatable(
+   { seed = seed, offset = 0 },
+   SqrlRng__meta)
+
 end
 
 return M

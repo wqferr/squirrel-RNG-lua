@@ -10,8 +10,8 @@ endif
 # The install rule should be used by anyone installing the library, so
 # we need to distinguish between OS path separators.
 install:
-	@cp $(luasrc) $(INST_LUADIR)
-	@cp $(tlsrc) $(INST_LUADIR)
+	cp $(luasrc) $(INST_LUADIR)
+	cp $(tlsrc) $(INST_LUADIR)
 
 # The all rule is only to be used by my dev PC (which is Windows)
 cyan-build:
